@@ -32,65 +32,51 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 	  			'uf_id' => $user_id,
 			));
 
-			if ( $contact_id['count'] == 1) {
+			if ( $contact_id['count'] == 1 && $contact_id['values'] != '' ) {
 				$contact_id = $contact_id['values'][0]['contact_id'];
-
-				// Get contact details
+				
+				/*
+				Not necesary, deal only with addess fields
 				$contact_details = civicrm_api3('Contact', 'get', array(
 				  'sequential' => 1,
 				  'id' => $contact_id,
 				));
 				$contact_details = $contact_details['values'][0];
+				*/
 
 		  		// Get billing address
 		  		$is_billing = civicrm_api3('Address', 'get', array(
 		  			'sequential' => 1,
 		  			'contact_id' => $contact_id,
-		  			'is_billing' => 1,
+		  			'location_type_id' => 'Billing',
 				));
 				$is_billing = $is_billing['values'][0];
 
-				// Get primary address
-				$is_primary = civicrm_api3('Address', 'get', array(
-		  			'sequential' => 1,
-		  			'contact_id' => $contact_id,
-		  			'is_primary' => 1,
-				));
-				$is_primary = $is_primary['values'][0];
-
-				// If user has Billing address ($is_billing) use it, else use Primary address ($isprimary);
+				// If user has Billing address ($is_billing)
 		  		if ( $is_billing['is_billing'] == 1 )  {
 		  			$street_address = $is_billing['street_address'];
 	  				$supplemental_address_1 = $is_billing['supplemental_address_1'];
 	  				$city = $is_billing['city'];
 	  				$postal_code = $is_billing['postal_code'];
+	  				$name = $is_billing['name'];
+	  				$name = explode(' ', $name);
 	  				$country = civicrm_api3('Country', 'get', array(
 									'sequential' => 1,
 									'id' => $is_billing['country_id'],
 								));
 	  				$country = $country['values'][0]['iso_code'];
 		  		} else {
-		  			$street_address = $is_primary['street_address'];
-	  				$supplemental_address_1 = $is_primary['supplemental_address_1'];
-	  				$city = $is_primary['city'];
-	  				$postal_code = $is_primary['postal_code'];
-	  				$country = civicrm_api3('Country', 'get', array(
-									'sequential' => 1,
-									'id' => $is_primary['country_id'],
-								));
-	  				$country = $country['values'][0]['iso_code'];
+		  			return $fields;
 		  		}
 
-				// Populate Woocommerce checkout fields
-				$fields['billing']['billing_first_name']['default'] = $contact_details['first_name']; // contact First name
-				$fields['billing']['billing_last_name']['default'] = $contact_details['last_name']; // contact Last name
-				$fields['billing']['billing_company']['default'] = $contact_details['current_employer']; // contact Current Employer
-				$fields['billing']['billing_phone']['default'] = $contact_details['phone']; // contact Primary Phone
-				$fields['billing']['billing_address_1']['default'] = $street_address;
-				$fields['billing']['billing_address_2']['default'] = $supplemental_address_1;
-				$fields['billing']['billing_city']['default'] = $city;
-				$fields['billing']['billing_postcode']['default'] = WC()->customer->set_postcode( $postal_code );
-				$fields['billing']['billing_country']['default'] = $country;
+				// Update woocommerce meta data before the form is loaded
+				update_user_meta( $user_id, 'billing_first_name', $name[0] );
+				update_user_meta( $user_id, 'billing_last_name', $name[1] );
+				update_user_meta( $user_id, 'billing_address_1', $street_address );
+				update_user_meta( $user_id, 'billing_address_2', $supplemental_address_1 );
+				update_user_meta( $user_id, 'billing_city', $city );
+				update_user_meta( $user_id, 'billing_postcode', $postal_code );
+				update_user_meta( $user_id, 'billing_country', $country );
 			  	
 			}
 		} 
