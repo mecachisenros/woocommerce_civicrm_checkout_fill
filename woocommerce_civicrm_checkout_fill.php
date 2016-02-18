@@ -10,7 +10,7 @@
 
 if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
     
-	add_filter( 'woocommerce_checkout_fields' , 'woocommerce_civicrm_populate_address' );
+	add_filter( 'woocommerce_billing_fields' , 'woocommerce_civicrm_populate_address' );
 	// Hook in Woocommerece's checkout
 	function woocommerce_civicrm_populate_address( $fields ) {
 
@@ -53,7 +53,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 				$is_billing = $is_billing['values'][0];
 
 				// If user has Billing address ($is_billing)
-		  		if ( $is_billing['is_billing'] == 1 )  {
+		  		if ( $is_billing['location_type_id'] == 5 )  {
 		  			$street_address = $is_billing['street_address'];
 	  				$supplemental_address_1 = $is_billing['supplemental_address_1'];
 	  				$city = $is_billing['city'];
