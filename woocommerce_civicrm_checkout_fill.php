@@ -72,7 +72,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 	  				
 	  				// get State/Province abbreviation, as theres no API for it we use CRM_Core_DAO
 	  				if ( !empty($is_billing['state_province_id']) ) {
-						$query = "SELECT abbreviation FROM civicrm_state_province WHERE id = %1";
+						$query = "SELECT name FROM civicrm_state_province WHERE id = %1";
 						$params = array(
 						  1 => array($is_billing['state_province_id'], 'Integer'));
 						$state_province_abbr = CRM_Core_DAO::singleValueQuery($query, $params);
