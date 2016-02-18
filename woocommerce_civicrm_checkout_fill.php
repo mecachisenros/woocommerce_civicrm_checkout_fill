@@ -35,14 +35,12 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 			if ( $contact_id['count'] == 1 && $contact_id['values'] != '' ) {
 				$contact_id = $contact_id['values'][0]['contact_id'];
 				
-				/*
-				Not necesary, deal only with addess fields
+				// Get Civi contact
 				$contact_details = civicrm_api3('Contact', 'get', array(
 				  'sequential' => 1,
 				  'id' => $contact_id,
 				));
 				$contact_details = $contact_details['values'][0];
-				*/
 
 		  		// Get billing address
 		  		$is_billing = civicrm_api3('Address', 'get', array(
@@ -59,7 +57,13 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 	  				$city = $is_billing['city'];
 	  				$postal_code = $is_billing['postal_code'];
 	  				$name = $is_billing['name'];
-	  				$name = explode(' ', $name);
+	  				
+	  				// If there's no Billing name in CiviCRM use Contact's name
+	  				if ( empty($name) ) {
+	  					$name = array( 0 => $contact_details['first_name'], 1 => $contact_details['last_name'] );
+	  				} else {
+	  					$name = explode(' ', $name);
+	  				}
 	  				$country = civicrm_api3('Country', 'get', array(
 									'sequential' => 1,
 									'id' => $is_billing['country_id'],
