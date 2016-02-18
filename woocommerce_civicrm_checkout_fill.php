@@ -90,6 +90,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 				update_user_meta( $user_id, 'billing_city', $city );
 				update_user_meta( $user_id, 'billing_postcode', $postal_code );
 				update_user_meta( $user_id, 'billing_country', $country );
+				update_user_meta( $user_id, 'billing_state', $state_province_abbr);
 			  	
 			}
 		} 
