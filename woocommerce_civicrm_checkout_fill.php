@@ -65,6 +65,15 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 									'id' => $is_billing['country_id'],
 								));
 	  				$country = $country['values'][0]['iso_code'];
+	  				
+	  				// get State/Province abbreviation, as theres no API for it we use CRM_Core_DAO
+	  				if ( !empty($is_billing['state_province_id']) ) {
+						$query = "SELECT abbreviation FROM civicrm_state_province WHERE id = %1";
+						$params = array(
+						  1 => array($is_billing['state_province_id'], 'Integer'));
+						$state_province_abbr = CRM_Core_DAO::singleValueQuery($query, $params);
+					}
+					
 		  		} else {
 		  			return $fields;
 		  		}
@@ -108,6 +117,12 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		  	'location_type_id' => 'Billing',
 		));
 		//$existing_billing = $existing_billing['values'][0];
+		
+		// State/Province is a required field in Woocommerce
+		$query = "SELECT id FROM civicrm_state_province WHERE abbreviation = %1";
+		$params = array(
+		  1 => array($user_meta['billing_state'], 'String'));
+		$state_province_id = CRM_Core_DAO::singleValueQuery($query, $params);
 
 		if ( $existing_billing['count'] != 0 && $existing_billing['values'] != '' ) {
 
