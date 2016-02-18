@@ -82,6 +82,67 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		} 
 		return $fields;
 	}
+	
+	// Update/Create billing address form Woocommerce's My-Account page
+	add_action( 'woocommerce_customer_save_address', 'woocommerce_civicrm_update_civi_address', 20 );
+
+	function woocommerce_civicrm_update_civi_address( $user_id ) {
+
+		$current_user = wp_get_current_user();
+		$user_id = $current_user->ID;
+
+		// Get all user meta data
+		$user_meta = array_map( function( $a ){ return $a[0]; }, get_user_meta( $user_id ) );
+
+		//$billing_address_1 = get_user_meta($user_id, 'billing_address_1', true);
+
+		$contact_id = civicrm_api3('UFMatch', 'get', array(
+	  		'sequential' => 1,
+	  		'uf_id' => $user_id,
+		));
+		$contact_id = $contact_id['values'][0]['contact_id'];
+
+		$existing_billing = civicrm_api3('Address', 'get', array(
+		  	'sequential' => 1,
+		  	'contact_id' => $contact_id,
+		  	'location_type_id' => 'Billing',
+		));
+		//$existing_billing = $existing_billing['values'][0];
+
+		if ( $existing_billing['count'] != 0 && $existing_billing['values'] != '' ) {
+
+			$country_id = civicrm_api3('Country', 'get', array(
+				'sequential' => 1,
+				'iso_code' => $user_meta['billing_country'],
+			));
+
+			// Update existing billing address
+			$is_billing = civicrm_api3('Address', 'create', array(
+			  	'sequential' => 1,
+			  	'contact_id' => $contact_id,
+			  	'id' => $existing_billing['id'],
+			  	'street_address' => $user_meta['billing_address_1'],
+			  	'supplemental_address_1' => $user_meta['billing_address_2'],
+			  	'city' => $user_meta['billing_city'],
+			  	'postal_code' => $user_meta['billing_postcode'],
+			  	'name' => $user_meta['billing_first_name'].' '.$user_meta['billing_last_name'],
+			  	'country_id' => $country_id['id'],
+			));
+		} else {
+			// create new Address
+			$is_billing = civicrm_api3('Address', 'create', array(
+			  	'sequential' => 1,
+			  	'contact_id' => $contact_id,
+			  	'location_type_id' => 'Billing',
+			  	'street_address' => $user_meta['billing_address_1'],
+			  	'supplemental_address_1' => $user_meta['billing_address_2'],
+			  	'city' => $user_meta['billing_city'],
+			  	'postal_code' => $user_meta['billing_postcode'],
+			  	'name' => $user_meta['billing_first_name'].' '.$user_meta['billing_last_name'],
+			  	'country_id' => $country_id['id'],
+			));
+		}
+	}
 }
 
 ?>
