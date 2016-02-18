@@ -142,6 +142,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 			  	'postal_code' => $user_meta['billing_postcode'],
 			  	'name' => $user_meta['billing_first_name'].' '.$user_meta['billing_last_name'],
 			  	'country_id' => $country_id['id'],
+			  	'state_province_id' => $state_province_id,
 			));
 		} else {
 			// create new Address
@@ -155,6 +156,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 			  	'postal_code' => $user_meta['billing_postcode'],
 			  	'name' => $user_meta['billing_first_name'].' '.$user_meta['billing_last_name'],
 			  	'country_id' => $country_id['id'],
+			  	'state_province_id' => $state_province_id,
 			));
 		}
 	}
